@@ -68,6 +68,14 @@
         "image": "background-default.r.png",
         "title": "Download the #CarmelStudio",
         "type": "default"
+      },
+      "components": {
+        "intro": {
+          "source": "summary",
+          "text": "dropbox://stjnmx5sb1rpjbq/contentFromDropbox.md?dl=0",
+          "image": "carmel-logo.png",
+          "textColor": "#37474F"
+        }
       }
     }
   },

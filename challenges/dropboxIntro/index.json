@@ -1,0 +1,16 @@
+{
+  "title": "Dropbox intro",
+  "summary": "Start to use dropbox in a sec",
+  "author": {
+    "name": "Adrien Benoist",
+    "email": "adrien.benoist45@gmail.com"
+  },
+  "level": 0,
+  "skills": ["json", "web", "copywriting", "branding","dropbox"],
+  "taskIds": [
+    "createEmailAccount",
+    "createNewAccount",
+    "verifyPhoneNumber",
+    "verificationCode"
+  ]
+}

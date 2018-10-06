@@ -1,0 +1,8 @@
+{
+    "id": "createEmailAccount",
+    "index": 1,
+    "title": "Log in to yahoo.com",
+    "instructions": "Open your browser (Google Chrome, Mozilla Firefox, Opera, Safari, etc) and search for the Yahoo website. Then find the creation account page. You should see a similar window as below.",
+    "help": "Type this address in the url bar https://login.yahoo.com/account/create, then hit ENTER.",
+    "files": ["chunks/intro/chunk.json"]
+}

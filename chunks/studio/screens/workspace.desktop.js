@@ -407,7 +407,8 @@ export default class Workspace extends Screen {
   }
 
   onBuyChallenge (challenge) {
-    this.triggerRedirect(this.isLoggedIn ? '/wallet' : '/login')
+    //this.triggerRedirect(this.isLoggedIn ? '/wallet' : '/login')
+    this.onShowTask()
   }
 
   renderChallenge () {

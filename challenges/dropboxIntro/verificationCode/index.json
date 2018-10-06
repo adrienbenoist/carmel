@@ -1,0 +1,8 @@
+{
+    "id": "verificationCode",
+    "index": 4,
+    "title": "Enter the verification code",
+    "instructions": "Enter the verification code that you received on your phone into the next step. The window should look like in the following image. Then, hint the **Verify** button.",
+    "help": "Enter the right code before 3 attempts because then you will have start all the account creation again.",
+    "files": ["chunks/intro/chunk.json"]
+}

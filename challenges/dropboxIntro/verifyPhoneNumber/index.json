@@ -1,0 +1,8 @@
+{
+    "id": "verifyPhoneNumber",
+    "index": 3,
+    "title": "Very your phone number",
+    "instructions": "After the second task you should end up in the page as shown above. You should just check that your enter the right country code corresponding to your country and your phone number. THen, hint **Text me an Account key** to continue.",
+    "help": "After hiting the button you should receive the code by text message. If not, you might have made a typo for your phone number.",
+    "files": ["chunks/intro/chunk.json"]
+}

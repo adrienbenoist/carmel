@@ -1,0 +1,8 @@
+{
+    "id": "createNewAccount",
+    "index": 2,
+    "title": "Create a new account",
+    "instructions": "Enter your **First name** and **Last Name** and chose a **email address** and **Password**. Choose the country phone code corresponding to your country, and enter your phone number. This is asked for security purposes. Next, enter your birth **month**, **Day** and **Year**. Finally, you can give your gender by selecting male or female but this is optional. Once done, click **Continue**.",
+    "help": "Enter your real telephone number as Yahoo will send you a confirmation code to be sure that you, and nobody else, created this account.",
+    "files": ["chunks/intro/chunk.json"]
+}
