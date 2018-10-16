@@ -1,12 +1,12 @@
 import React from 'react'
 import { Screen, Components } from 'react-dom-chunky'
-import { Card, CardActions, CardActionButtons } from 'rmwc/Card'
-import { Button, ButtonIcon } from 'rmwc/Button'
+import { Card, CardActions, CardActionButtons } from '@rmwc/card'
+import { Button, ButtonIcon } from '@rmwc/button'
 import { List, Tabs, notification, Icon } from 'antd'
 import UserInfo from '../../auth/components/userInfo'
 import { Data } from 'react-chunky'
-import { ListDivider } from 'rmwc/List'
-import { Typography } from 'rmwc/Typography'
+import { ListDivider } from '@rmwc/list'
+import { Typography } from '@rmwc/typography'
 const TabPane = Tabs.TabPane
 
 export default class MainBountiesScreen extends Screen {
@@ -74,7 +74,7 @@ export default class MainBountiesScreen extends Screen {
         textAlign: 'center',
         color: '#78909C'
       }}>
-      No bounties yet
+      No bounties yet. Coming soon.
     </Typography>
     </div>
   }
@@ -90,7 +90,7 @@ export default class MainBountiesScreen extends Screen {
         marginBottom: '20px',
         justifyContent: 'flex-start'
       }}>
-      <Icon style={{ margin: '5px 10px 0px 0px' }} type='gift' theme='filled' />
+      <Icon style={{ margin: '5px 10px 0px 0px' }} type='trophy' theme='filled' />
       Carmel Bounties
     </Typography>
   }
