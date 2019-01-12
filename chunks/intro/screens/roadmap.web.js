@@ -1,17 +1,11 @@
 import React from 'react'
 import { Screen } from 'react-dom-chunky'
-import { Steps } from 'antd'
 import { Typography } from '@rmwc/typography'
-import { Card, CardActions, CardActionButtons } from '@rmwc/card'
-import { Button } from '@rmwc/button'
+import { Card } from '@rmwc/card'
 import { Chart } from '../components'
-import Periods from '../data/periods'
 import Milestones from '../data/milestones'
+import TimelineComponent from '../components/timeline'
 
-const Step = Steps.Step
-
-const CurrentMilestoneId = 7
-const CurrentPeriodId = 1
 
 export default class RoadmapScreen extends Screen {
   constructor (props) {
@@ -24,57 +18,13 @@ export default class RoadmapScreen extends Screen {
     super.componentDidMount()
   }
 
-  renderPeriod (period) {
-    const align = this.isSmallScreen ? 'left' : 'center'
-    const description = <Typography use='subheading2' tag='h1' style={{
-      color: '#90A4AE',
-      marginBottom: '30px',
-      textAlign: align
-    }}>
-      {period.summary}
-    </Typography>
-
-    return <Step
-      key={period.id}
-      title={period.title}
-      description={description} />
-  }
 
   details (milestone) {
     this.triggerRawRedirect(`https://github.com/fluidtrends/carmel/milestone/${milestone.id}`)
   }
 
-  renderMilestone (milestone) {
-    const description = <div style={{
-      marginRight: '30px'
-    }}>
-      <Typography use='subheading2' tag='h1' style={{
-        color: '#90A4AE',
-        marginBottom: '10px',
-        textAlign: 'left'
-      }}>
-        {milestone.description}
-      </Typography>
-      <Typography use='subheading2' tag='h1' style={{
-        textAlign: 'left'
-      }}>
-        <Button onClick={this._details(milestone)} style={{ border: '1px solid #4FC3F7' }}>
-          See Milestone Details
-     </Button>
-      </Typography>
-    </div>
-
-    return <Step
-      key={milestone.id}
-      description={description} />
-  }
-
-  renderPeriods () {
-    return Periods.map(period => this.renderPeriod(period))
-  }
-
   renderMilestones () {
-    return Milestones.map(milestone => this.renderMilestone(milestone))
+    return <TimelineComponent isSmallScreen={this.isSmallScreen} milestones={Milestones.milestones} doneColor={Milestones.doneColor} progressColor={Milestones.progressColor} todoColor={Milestones.todoColor} doneIcon={Milestones.doneIcon} progressIcon={Milestones.progressIcon} todoIcon={Milestones.todoIcon} />
   }
 
   renderChart () {
@@ -84,8 +34,6 @@ export default class RoadmapScreen extends Screen {
   renderMainContent () {
     const width = this.isSmallScreen ? '95vw' : '800px'
     const padding = this.isSmallScreen ? '2px' : '30px'
-    const direction = this.isSmallScreen ? 'vertical' : 'horizontal'
-    const stepsPad = this.isSmallScreen ? 30 : 0
 
     return (<div
       style={{
@@ -98,38 +46,18 @@ export default class RoadmapScreen extends Screen {
       }}>
 
       <Card style={{ width, margin: '10px', padding }}>
-        <Typography use='display1' tag='h1' style={{ color: '#90A4AE', marginBottom: '30px', marginTop: '20px' }}>
+        <Typography use='headline4' tag='h1' style={{ color: this.props.theme.primaryColor, marginBottom: '30px', marginTop: '20px' }}>
           Token Distribution
         </Typography>
-
         {this.renderChart()}
-
-        <Steps
-          progressDot
-          direction={direction}
-          style={{ margin: `${stepsPad}px` }}
-          current={CurrentPeriodId}>
-
-          {this.renderPeriods()}
-
-        </Steps>
       </Card>
 
       <Card style={{ width, margin: '10px', padding }}>
-        <Typography use='display1' tag='h1' style={{ color: '#90A4AE', marginBottom: '30px', marginTop: '20px' }}>
-          Key Milestones
+        <Typography use='headline4' tag='h1' style={{ color: this.props.theme.primaryColor, marginBottom: '30px', marginTop: '20px' }}>
+          Major Milestones
         </Typography>
-
-        <Steps
-          direction={'vertical'}
-          style={{ margin: `${stepsPad}px` }}
-          current={CurrentMilestoneId}>
-
-          {this.renderMilestones()}
-
-        </Steps>
+        {this.renderMilestones()}
       </Card>
-
     </div>)
   }
 

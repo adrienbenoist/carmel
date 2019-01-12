@@ -1,0 +1,77 @@
+{
+  "name": "payments",
+  "routes": {
+    "main": {
+      "title": "Early Access",
+      "icon": "account_balance_wallet",
+      "path": "/pricing",
+      "action": "true",
+      "startOperationsOnMount": false,
+      "operations": {
+        "getToken": [
+          "rest://create/payments/token#getToken",
+          {
+            "onSuccess": "gotToken",
+            "onError": "tokenError"
+          }
+        ],
+        "pay": [
+          "rest://create/payments/pay#pay",
+          {
+            "onSuccess": "paymentOk",
+            "onError": "paymentError"
+          }
+        ]
+      },
+      "components3": {
+        "intro": {
+          "source": "summary",
+          "text": "local://preorder",
+          "image": "carmel.svg",
+          "textColor": "#37474F"
+        }
+      }
+    },
+    "checkout": {
+      "title": "Checkout",
+      "icon": "account_balance_wallet",
+      "path": "/checkout",
+      "startOperationsOnMount": false,
+      "operations": {
+        "getToken": [
+          "rest://create/payments/token#getToken",
+          {
+            "onSuccess": "gotToken",
+            "onError": "tokenError"
+          }
+        ],
+        "pay": [
+          "rest://create/payments/pay#pay",
+          {
+            "onSuccess": "paymentOk",
+            "onError": "paymentError"
+          }
+        ]
+      }
+    }
+  },
+  "service": {
+    "functions": [
+      "post://pay#pay",
+      "post://token#token"
+    ],
+    "dependencies": {
+      "braintree": "latest"
+    },
+    "requiredFields": {},
+    "permissions": {
+      "pay": [
+        "ses:SendEmail"
+      ],
+      "token": [
+        "ses:SendEmail"
+      ]
+    },
+    "schedule": {}
+  }
+}

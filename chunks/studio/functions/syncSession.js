@@ -22,7 +22,35 @@ const getWallet = (userId) => {
   })
 }
 
-const updateUserWallet = (userId, amount) => {
+const getChallenge = (challengeId) => {
+  return new Promise((resolve, reject) => {
+    return chunky.firebase.operation('retrieve', { key: `challenges/${challengeId}` })
+          .then((challenge) => ((!challenge || (Array.isArray(challenge) && challenge.length === 0)) ? resolve() : resolve(challenge)))
+          .catch(() => resolve())
+  })
+}
+
+const updateChallenge = (challengeId, data) => {
+  if (!challengeId || Object.keys(data).length === 0) {
+    return Promise.resolve()
+  }
+
+  return getChallenge(challengeId).then((challenge) => {
+    var updates = {}
+    Object.keys(data).map(field => {
+      updates[field] = data[field] + ((challenge && challenge[field]) || 0)
+    })
+    return chunky.firebase.operation('update', Object.assign({}, { key: `challenges/${challengeId}`, timestamp: `${Date.now()}` }, updates))
+  })
+}
+
+const updateUserWallet = (controller, userId) => {
+  if (!controller || !controller.achievement || !controller.achievement.tokens) {
+    return Promise.resolve()
+  }
+
+  const amount = controller.achievement.tokens
+
   return getWallet(userId)
         .then(wallet =>
           chunky.firebase.operation('update', { key: `wallets/${wallet._id}`, carmel: (parseFloat(wallet.carmel) + parseFloat(amount)) })
@@ -53,7 +81,8 @@ const updateSession = (data, account, previousSession) => {
     { timestamp,
       stage: data.stage || ''
     },
-  data.challengeId && { challengeId: data.challengeId },
+    data.challengeId && { challengeId: data.challengeId },
+    data.taskIndex && { taskIndex: data.taskIndex },
   account && {
     userId: account.user.uid,
     userEmail: account.user.email,
@@ -68,33 +97,45 @@ const updateSession = (data, account, previousSession) => {
     session.achievements[data.stage] = { timestamp }
   }
 
+  var challengeData = {}
+
   switch (data.stage) {
     case Stages.CHALLENGE_STARTED:
       session.challenges[data.challengeId] = Object.assign({}, session.challenges[data.challengeId], { startTimestamp: timestamp, status: 'started', taskIndex: 1, updatedTimestamp: timestamp })
+      challengeData = { started: 1 }
       break
     case Stages.CHALLENGE_STOPPED:
       session.challenges[data.challengeId] = Object.assign({}, session.challenges[data.challengeId], { status: 'stopped', taskIndex: 1, updatedTimestamp: timestamp, stopTimestamp: timestamp })
+      challengeData = { stopped: 1 }
       break
     case Stages.CHALLENGE_RATED:
       delete session.challengeId
+      delete session.taskIndex
+      challengeData = { rated: 1, ratings: data.rating }
       session.challenges[data.challengeId] = Object.assign({}, session.challenges[data.challengeId], { status: 'stopped', taskIndex: 1, updatedTimestamp: timestamp, stopTimestamp: timestamp })
       break
     case Stages.CHALLENGE_CANCELLED:
       delete session.challengeId
+      delete session.taskIndex
+      challengeData = { cancelled: 1 }
       break
     case Stages.TASK_COMPLETED:
       session.challenges[data.challengeId] = Object.assign({}, session.challenges[data.challengeId], { taskIndex: parseInt(session.challenges[data.challengeId].taskIndex + 1), updatedTimestamp: timestamp })
+      challengeData = { tasksCompleted: 1 }
       break
     case Stages.CHALLENGE_COMPLETED:
       session.challenges[data.challengeId] = Object.assign({}, session.challenges[data.challengeId], { completedTimestamp: timestamp, status: 'completed', taskIndex: parseInt(session.challenges[data.challengeId].taskIndex + 1), updatedTimestamp: timestamp })
+      challengeData = { completed: 1 }
       break
     default:
   }
 
   var controller = (!hasPreviousStageAchivement && hasStageAchivement ? { type: 'achievement', achievement: Object.assign({}, Stages.Achievements[data.stage]) } : undefined)
 
-  return chunky.firebase.operation(account ? 'add' : 'create', session)
-         .then((result) => Object.assign({}, result, controller && { controller }))
+  return updateChallenge(data.challengeId, challengeData)
+          .then(() => updateUserWallet(controller, userId)
+              .then(() => chunky.firebase.operation(account ? 'add' : 'create', session)
+                  .then((result) => Object.assign({}, result, controller && { controller }))))
 }
 
 function executor ({ event, chunk, config, account }) {

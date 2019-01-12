@@ -1,3 +1,22 @@
+@import 'chat-widged.css';
+
+body {
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: inherit;
+}
+
+strong {
+  font-weight: bold;
+}
+
 .container {
   max-width: 24rem;
   margin: 1rem auto;
@@ -275,7 +294,7 @@
     left: auto;
     right: 100%;
     border-color: transparent;
-    border-right-color: #E0E0E0;
+    border-right-color: #e0e0e0;
   }
   .vertical-timeline-element.vertical-timeline-element--right
     .vertical-timeline-element-content
@@ -420,9 +439,44 @@
 }
 
 .mdc-text-field__input {
-  flex: 1
+  flex: 1;
 }
 
 .mdc-text-field--upgraded:not(.mdc-text-field--fullwidth):not(.mdc-text-field--box) {
-  align-items: center
+  align-items: center;
+}
+
+.ant-timeline-item-content {
+  top: -11px;
+}
+
+.ant-carousel {
+  height: 300px;
+  width: 90vw;
+  margin: 15px 50px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 20px 0px;
+}
+
+.ant-carousel .slick-slide {
+  height: 300px;
+}
+
+.ant-carousel .slick-dots li button {
+  background-color: #4dd0e1;
+}
+
+.ant-carousel .slick-dots li.slick-active button {
+  background-color: #00838f;
+}
+
+.anticon svg {
+  display: none;
+}
+
+.challenge-card {
+  height: 100%;
+}
+
+.challenge-card .ant-card-head {
+  padding-right: 0;
 }

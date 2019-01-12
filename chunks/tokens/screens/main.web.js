@@ -1,45 +1,38 @@
 import React from 'react'
 import { Screen } from 'react-dom-chunky'
-import { Checkout } from '../components'
+import Investors from '../components/investors'
 
 export default class TokensScreen extends Screen {
   constructor (props) {
     super(props)
+
     this.state = { ...this.state }
+    this._onAction = this.onAction.bind(this)
   }
 
   componentDidMount () {
     super.componentDidMount()
   }
 
-  renderMainContent () {
-    return (<div
-      style={{
-        display: 'flex',
-        flex: 1,
-        justifyContent: 'center',
-        flexDirection: 'column',
-        alignItems: 'center'
-      }}>
-      <Checkout
-        error={this.state.error}
-        transaction={this.state.transaction}
-        triggerRawRedirect={this.triggerRawRedirect}
-        newTransaction={this.props.newTransaction} />
-    </div>)
+  onAction(item) {
+    this.triggerRedirect(item.path)
   }
 
-  transactionOk (transaction) {
-    if (transaction.error) {
-      this.setState({ error: transaction.error })
-      return
-    }
-
-    this.setState({ transaction })
-  }
-
-  transactionError (error) {
-    this.setState({ error: error.message })
+  renderMainContent() {
+      return (<div
+        style={{
+          display: 'flex',
+          flex: 1,
+          padding: "20px",
+          justifyContent: 'center',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}>
+        <Investors
+        onAction={this._onAction}
+        redirect={this.triggerRedirect}
+        compact={this.isSmallScreen}/>
+      </div>)
   }
 
   components () {

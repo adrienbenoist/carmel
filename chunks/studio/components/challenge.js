@@ -23,9 +23,14 @@ const { errorMessages } = errorMessagesJson
 export default class Challenge extends Component {
   constructor (props) {
     super(props)
+    this.state = Object.assign({},
+      { ...this.state, taskIndex: 1 },
+      props.challenge &&
+      props.challenge.history &&
+      props.challenge.history.taskIndex &&
+        { started: (props.challenge.history.status === 'started' ? true : false),
+          taskIndex: props.challenge.history.taskIndex })
 
-    this.state = Object.assign({}, { ...this.state, taskIndex: 1 },
-      props.challenge && props.challenge.history && props.challenge.history.taskIndex && { started: (props.challenge.history.status === 'started' ? true : false), taskIndex: props.challenge.history.taskIndex })
     this._shell = new Shell()
     this._goBack = this.goBack.bind(this)
     this._toggleStarted = this.toggleStarted.bind(this)
@@ -177,6 +182,21 @@ export default class Challenge extends Component {
     this.shell.cache('taskId', started ? task.id : '')
     
     this.setState({ started, taskIndex, task, showTask: started })
+    // if (this.isStarted) {
+    //   this.props.onStopChallenge && this.props.onStopChallenge({ challengeId: this.props.challenge.id })
+    //   this.setState({ started: false, showTask: false, taskIndex: 1 })
+    //   return
+    // }
+
+    // if (this.props.account) {
+    //   const taskIndex = 1
+    //   const task = this.props.challenge.tasks[taskIndex - 1]
+    //   this.props.onStartChallenge && this.props.onStartChallenge({ challengeId: this.props.challenge.id })
+    //   this.setState({ started: true, showTask: true, task, taskIndex })
+    //   return
+    // }
+    
+    // this.props.onTakeChallenge && this.props.onTakeChallenge()
   }
 
   isTaskComplete (task) {
@@ -239,7 +259,7 @@ export default class Challenge extends Component {
   }
 
   get price () {
-    return ((this.props.challenge.level + 1) * 5 / this.rate).toFixed(2)
+    return ((this.props.challenge.level + 1) * 500 / this.rate).toFixed(2)
   }
 
   renderMainAction () {
@@ -267,7 +287,7 @@ export default class Challenge extends Component {
     }
 
     const xp = (this.props.challenge.level + 1) * 5
-    const tokens = parseFloat(xp * 1.00).toFixed(2)
+    const tokens = parseFloat(xp * 100)
 
     return <div style={{
       display: 'flex',
@@ -280,10 +300,10 @@ export default class Challenge extends Component {
       <Button
         style={{
           color: '#ffffff',
-          backgroundColor: `${this.isStarted || this.isPurchased ? '#03A9F4' : '#4CAF50'}`
+          backgroundColor: `${this.isStarted || this.isPurchased ? '#03A9F4' : '#00bcd4'}`
         }}
         onClick={this.isStarted ? this._continueChallenge : this._toggleStarted}>
-        { this.isStarted ? 'Keep Going' : (this.isPurchased ? 'Start Challenge' : `Send ${tokens} CARMEL to start`) }
+        { this.isStarted ? 'Keep Going' : 'Start Challenge'}
       </Button>
     </div>
   }
@@ -341,12 +361,21 @@ export default class Challenge extends Component {
 
   render () {
     return <div style={{
-      width: '380px',
+      width: '100%',
       alignSelf: 'center',
-      marginBottom: '10px'
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      display: 'flex'
     }}>
-      { this.renderContent() }
-      { this.renderFooter() }
+      <div style={{
+        width: '450px',
+        alignSelf: 'center',
+        marginBottom: '10px'
+      }}>
+        { this.renderContent() }
+        { this.renderFooter() }
+      </div>
     </div>
   }
 

@@ -32,6 +32,10 @@ export default class Challenges extends Component {
       return <div />
     }
 
+    if (!this.props.account) {
+      return <div />
+    }
+
     var since = moment(parseFloat(item.history.purchaseTimestamp)).fromNow()
     var header = `You got this challenge ${since}`
 
@@ -40,7 +44,7 @@ export default class Challenges extends Component {
       header = `You completed this challenge ${since}`
     }
 
-    return <Typography use='body1' style={{
+    return <Typography use='caption' style={{
       textAlign: 'center',
       color: '#81C784',
       padding: '5px',
@@ -51,7 +55,8 @@ export default class Challenges extends Component {
   }
 
   renderChallenge (item) {
-    var prompt = (item.history ? 'Take Challenge' : 'Get Challenge')
+    // var prompt = (item.history ? 'Take Challenge' : 'Take Challenge')
+    var prompt = 'Take Challenge'
 
     if (item.history && item.history.status === 'completed') {
       prompt = `Rate Challenge`
@@ -77,7 +82,7 @@ export default class Challenges extends Component {
             style={{
               display: 'flex',
               color: '#ffffff',
-              backgroundColor: (item.history ? '#03A9F4' : '#4CAF50')
+              backgroundColor: (item.history ? '#03A9F4' : '#00bcd4')
             }}>
             { prompt }
           </Button>
@@ -88,13 +93,19 @@ export default class Challenges extends Component {
 
   render () {
     return <div style={{
-      width: '380px',
+      width: '100%',
       alignSelf: 'center',
-      marginBottom: '10px'
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      display: 'flex'
     }}>
       <List
         itemLayout='vertical'
         size='large'
+        style={{
+          width: '450px'
+        }}
         dataSource={this.props.challenges}
         renderItem={item => this.renderChallenge(item)} />
     </div>

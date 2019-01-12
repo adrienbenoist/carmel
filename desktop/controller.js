@@ -3,6 +3,10 @@ const _name = 'carmelstudio'
 const Session = require('./session')
 const chokidar = require('chokidar')
 const { downloadArchive } = require('./utils')
+const express = require('express')
+const router = express.Router()
+const app = express()
+const bodyParser = require('body-parser')
 
 const session = new Session()
 
@@ -15,7 +19,9 @@ const saveCache = (key, data, options) => {
 
   if (options && options.push) {
     const old = session.sessionVault.read(key) || []
-    if (old && Array.isArray(old)) {
+    console.log(old)
+    console.log(data)
+    if (old && Array.isArray(old) && !old.includes(data)) {
       console.log(`[${_name}] cache ${key}=${data} push`)
       session.sessionVault.write(key, old.concat(data))
       return
@@ -55,6 +61,7 @@ const start = ({ ipcMain, mainWindow }) => {
               resolve(data)
             })
             .catch((error) => {
+              console.log(error)
               console.log(`[${_name}] could not start`)
               reject(error)
             })

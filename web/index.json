@@ -13,6 +13,15 @@
     }
   },
   "footer": {
+    "socialMediaLinks": {
+      "facebook": "https://www.facebook.com/carmelio-347131802460343/",
+      "medium": "http://medium.com/carmelplatform",
+      "instagram": "https://www.instagram.com/carmel.io/",
+      "github": "https://github.com/fluidtrends/carmel",
+      "youtube": "https://www.youtube.com/channel/UCjiQXohOk0pBmJ6PFElQL-g",
+      "twitter": "https://twitter.com/carmelplatform",
+      "linkedin": "https://www.linkedin.com/company/carmel-platform/"
+    },
     "sections": [
       {
         "title": "Platform",
@@ -21,12 +30,17 @@
           {
             "id": "whitepaper",
             "title": "Whitepaper",
-            "link": "local://whitepaper"
+            "link": "http://files.carmel.io/whitepaper/en-v1.4.pdf"
           },
           {
-            "id": "code",
-            "title": "Source Code",
-            "link": "http://github.com/fluidtrends/carmel"
+            "id": "team",
+            "title": "Team",
+            "link": "https://carmel.io/team"
+          },
+          {
+            "id": "download",
+            "title": "Download",
+            "link": "https://carmel.io/download"
           },
           {
             "id": "channel",
@@ -39,6 +53,11 @@
         "title": "Roadmap",
         "id": "roadmap",
         "elements": [
+          {
+            "id": "code",
+            "title": "Source Code",
+            "link": "http://github.com/fluidtrends/carmel"
+          },
           {
             "id": "board",
             "title": "Board",

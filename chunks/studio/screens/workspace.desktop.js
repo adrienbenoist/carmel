@@ -1,252 +1,101 @@
 import React from 'react'
-import { Component, Components, Screen } from 'react-dom-chunky'
-import { Form, Icon, Row, Col, List, Collapse, Alert, Layout, Breadcrumb, Dropdown, Avatar, Menu, Tabs, notification } from 'antd'
-import { Card, CardActions, CardActionButtons } from '@rmwc/card'
-import { Button, ButtonIcon } from '@rmwc/button'
-import { Fab } from '@rmwc/fab'
-import { Elevation } from '@rmwc/elevation'
-import fs from 'fs-extra'
-import path from 'path'
-import { Parallax } from 'react-spring'
-import { Typography } from '@rmwc/typography'
 import { Data } from 'react-chunky'
-import PopupMessage from '../components/popup'
-import Shell from '../components/shell'
-import Challenge from '../components/challenge'
-import Challenges from '../components/challenges'
+import Screen from './base.desktop'
+import { Typography } from '@rmwc/typography'
+import { Button, ButtonIcon } from '@rmwc/button'
+import { Icon } from '@rmwc/icon'
+import { Spring } from 'react-spring'
 import Browser from '../components/browser'
+import Challenge from '../components/challenge'
 import Explorer from '../components/explorer'
-import Task from '../components/task'
-import Prompt from '../components/prompt'
-import WorkspaceContent from '../components/workspaceContent'
+import Challenges from '../components/challenges'
+import Editor from '../components/editor'
+import Live from '../components/live'
+import Wobble from 'react-reveal/Wobble'
+import Bounce from 'react-reveal/Bounce'
+import Fade from 'react-reveal/Fade'
+import RubberBand from 'react-reveal/RubberBand'
+import Zoom from 'react-reveal/Zoom'
+import Pulse from 'react-reveal/Bounce'
+import { notification } from 'antd'
 import * as Stages from '../functions/stages'
-import moment from 'moment'
-
-const { Sider, Content, Footer } = Layout
-const { SubMenu } = Menu
-const TabPane = Tabs.TabPane
-const Panel = Collapse.Panel
-
-const FormItem = Form.Item
-const HOME = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME']
-const CARMEL_HOME = path.resolve(HOME, '.carmel')
-const LIGHT_START = false
 
 export default class Workspace extends Screen {
   constructor (props) {
     super(props)
 
-    this.state = { }
-    this._shell = new Shell()
-    this._onProductOption = this.onProductOption.bind(this)
-    this._onScreenChanged = this.onScreenChanged.bind(this)
-    this._onTogglePreview = this.onTogglePreview.bind(this)
+    this.state = { ...super.state }
     this._onSelectChallenge = this.onSelectChallenge.bind(this)
+    this._onBuyChallenge = this.onBuyChallenge.bind(this)
+    this._onTakeChallenge = this.onTakeChallenge.bind(this)
     this._onStartChallenge = this.onStartChallenge.bind(this)
-    this._onStopChallenge = this.onStopChallenge.bind(this)
-    this._onUnselectChallenge = this.onUnselectChallenge.bind(this)
-    this._onShowTask = this.onShowTask.bind(this)
     this._onTaskCompleted = this.onTaskCompleted.bind(this)
     this._onChallengeCompleted = this.onChallengeCompleted.bind(this)
     this._onChallengeRated = this.onChallengeRated.bind(this)
-    this._onHideTask = this.onHideTask.bind(this)
-    this._onShowCompileErrors = this.onShowCompileErrors.bind(this)
-    this._onBuyChallenge = this.onBuyChallenge.bind(this)
-    this._onPublishProduct = this.onPublishProduct.bind(this)
+    this._onStopChallenge = this.onStopChallenge.bind(this)
+    this._onUnselectChallenge = this.onUnselectChallenge.bind(this)
+    this._onFileOpen = this.onFileOpen.bind(this)
+    this._onFileClose = this.onFileClose.bind(this)
+    this._cloudSetupDone = this.cloudSetupDone.bind(this)
   }
 
   componentDidMount () {
     super.componentDidMount()
-    this.start()
-  }
 
-  get shell () {
-    return this._shell
-  }
-
-  get products () {
-    return this.props.session.products
-  }
-
-  get product () {
-    return this.state.product || this.props.session.product
-  }
-
-  onShowAccountScreen () {
-    this.triggerRedirect(this.isLoggedIn ? '/me' : '/login')
-  }
-
-  onShowCommunityScreen () {
-    this.triggerRedirect('/community')
-  }
-
-  onShowBountiesScreen () {
-    this.triggerRedirect('/bounties')
-  }
-
-  onShowTask () {
-    this.setState({ enableTabs: true })
-  }
-
-  onHideTask () {
-    this.setState({ enableTabs: false })
-  }
-
-  controllerMessage (options) {
-    switch (options.type) {
-      case 'bonus':
-        return `You just unlocked ${options.tokens} CARMEL tokens! ${options.reason}`
-      default:
-        return `You're awesome`
-    }
-  }
-
-  get challenges () {
-    return this.props.session.challenges.map(challenge => {
-      const newChallenge = Object.assign({}, challenge, this.state.userChallenges && this.state.userChallenges[challenge.id] && { history: this.state.userChallenges[challenge.id] })
-      return newChallenge
+    Data.Cache.retrieveCachedItem('openFiles').then((openFiles) => {
+      this.setState({ openFiles })
     })
+
+    Data.Cache.retrieveCachedItem('product')
+              .then((data) => { this.changeProduct(data.id, true) })
+              .catch(() => { this.changeProduct(this.product.id, true) })
   }
 
-  get challenge () {
-    const id = this.state.challengeId
-    return this.challenges.find(c => id === c.id)
-  }
-
-  updateLocalSession (data) {
-    const { challenges, controller, challengeId } = data
-    const userChallenges = Object.assign({}, challenges)
-
-    if (!controller) {
-      this.setState({ userChallenges, challengeId })
-      return
-    }
-
-    switch (controller.type) {
-      case 'achievement':
-        const achievement = controller.achievement
-        const popupButtonTitle = 'Continue'
-        const popupTitle = 'Congratulations'
-        const popupIcon = achievement.type === 'bonus' ? 'tokens' : 'cup'
-        const popupMessage = this.controllerMessage(achievement)
-
-        this.setState(Object.assign({}, { userChallenges, challengeId, showPopup: true, popupIcon, popupButtonTitle, popupMessage, popupTitle }))
-        break
-      default:
-    }
-  }
-
-  sessionSynced (response) {
-    if (!response || !response.data) {
-      return
-    }
-
-    this.updateLocalSession(response.data)
-  }
-
-  failedToSyncSession (error) {
-    console.log('failedToSyncSession', error)
-  }
-
-  onPublishProduct () {
-    this.setState({ productPublishing: true, preview: false })
-    this.shell.exec('publishProduct', { id: this.product.id, domain: 'idancali.com' }, ({ status }) => {
-      this.setState({ productPublishingStatus: status })
-    })
-    .then((data) => {
-      this.setState({ productPublishing: false, productPublished: true, productPublishingTimestamp: Date.now() })
-    })
-    .catch((error) => {
-      this.setState({ productPublishing: false, productPublished: false, productPublishingError: error })
-    })
-  }
-
-  startProduct () {
-    this.shell.exec('startProduct', { id: this.product.id, light: LIGHT_START }, (compilation) => {
-      if (compilation.compiled && !this.state.productStarted) {
-        this.setState({ compilation, productStarted: true, productStarting: false })
-        return
-      }
-
-      this.setState({ compilation })
-    })
-    .then(({ files, dir, port }) => {
-      if (LIGHT_START) {
-        this.setState({ files, dir, port, productStarted: true, productStarting: false })
-        return
-      }
-      this.setState({ files, dir, port })
-    })
-    .catch((error) => {
-      const compilation = {
-        compiled: true,
-        compiling: false,
-        errors: [error.message]
-      }
-      this.setState({ compilation, productStarted: true, productStarting: false })
-    })
-  }
-
-  syncSession (data) {
-    const request = Object.assign({},
-      { machineId: this.props.session.machineId,
-        machineFingerprint: this.props.session.machineFingerprint,
-        stage: Stages.WORKSPACE,
-        challengeId: ''
-      },
-      data)
-
-    this.props.syncSession(request)
-  }
-
-  start () {
-    this.setState({ productStarting: true, productStarted: false })
-    this.syncSession()
-    return this.startProduct()
-  }
-
-  onScreenChanged (type) {
-    switch (type) {
-      case 'community':
-        this.triggerRedirect('/community')
-        break
-      case 'bounties':
-        this.triggerRedirect('/bounties')
-        break
-      case 'settings':
-        this.triggerRedirect('/me')
-        break
-      default:
-    }
-  }
-
-  onProductOption (type) {
-    // switch (type) {
-    //   case 'publishProduct':
-    //     this.onPublishProduct()
-    //     break
-    //   case 'switchProduct':
-    //     // this.triggerRedirect('/new')
-    //     break
-    //   case 'openFile':
-    //     this.showFileBrowser()
-    //     break
-    //   case 'editSettings':
-    //     break
-    //   default:
-    // }
-  }
-
-  onTogglePreview (preview) {
-    this.setState({ preview })
+  cloudSetupDone() {
+    this.refreshGlobal()
   }
 
   onSelectChallenge ({ challengeId }) {
     this.setState({ challengeId })
   }
 
+  onBuyChallenge (challenge) {
+    if (!this.isLoggedIn) {
+      this.triggerRedirect('/login')
+      return
+    }
+
+    const { level, author } = this.challenge
+    this.setState({ inProgress: true, progressMessage: 'Transferring Tokens ...' })
+
+    this.props.sendTokens({
+      amount: this.calculatePrice(level),
+      to: author.id,
+      type: 'challengePurchase',
+      data: {
+        challengeId: this.state.challengeId
+      }
+    })
+  }
+
+  onTakeChallenge () {
+    // TODO: more rules will be applied here, once the subscription model will be online
+
+    if (!this.isLoggedIn) {
+      this.triggerRedirect('/login')
+      return
+    }
+
+    this.setState({ inProgress: false })
+    this.syncSession()
+  }
+
+  onStartChallenge ({ challengeId }) {
+    this.syncSession({ stage: Stages.CHALLENGE_STARTED, challengeId })
+  }
+
   onTaskCompleted ({ taskIndex, challengeId }) {
-    this.syncSession({ stage: Stages.TASK_COMPLETED, challengeId })
+    this.syncSession({ stage: Stages.TASK_COMPLETED, challengeId, taskIndex })
   }
 
   onChallengeCompleted ({ challengeId }) {
@@ -257,136 +106,204 @@ export default class Workspace extends Screen {
     this.syncSession({ stage: Stages.CHALLENGE_RATED, challengeId, rating })
   }
 
-  onStartChallenge ({ challengeId }) {
-    this.syncSession({ stage: Stages.CHALLENGE_STARTED, challengeId })
-  }
-
   onStopChallenge ({ challengeId }) {
     this.syncSession({ stage: Stages.CHALLENGE_STOPPED, challengeId })
   }
 
   onUnselectChallenge () {
-    this.syncSession({ stage: Stages.CHALLENGE_CANCELLED })
     this.setState({ challengeId: '' })
   }
 
-  onShowCompileErrors () {
-    console.log(this.state.compilation.errors)
-  }
+  onFileOpen (file) {
+    const openFiles = Object.assign({}, this.openFiles, { [file]: true })
 
-  get productStatus () {
-    const isStarting = (this.state.productStarting && !this.state.productStarted)
-    const isStarted = (!this.state.productStarting && this.state.productStarted)
-    const isPublishing = (this.state.productPublishing)
-    const isPublished = (!this.state.productPublishing && this.state.productPublished)
-
-    const isCompiling = (isStarted && this.state.compilation && !this.state.compilation.compiled && this.state.compilation.compiling)
-    const isCompiled = (isStarted && this.state.compilation && this.state.compilation.compiled && !this.state.compilation.compiling)
-    const isCompiledWithErrors = (isCompiled && this.state.compilation.errors && this.state.compilation.errors.length > 0)
-    const isCompiledWithoutErrors = (isCompiled && (!this.state.compilation.errors || this.state.compilation.errors.length === 0))
-
-    const status = {
-      isStarting,
-      isPublishing,
-      isStarted,
-      isCompiling,
-      isCompiled,
-      isCompiledWithErrors,
-      isCompiledWithoutErrors
-    }
-
-    return status
-  }
-
-  renderProductStatusPrompt () {
-    const status = this.productStatus
-
-    var alertMessage = `The product is starting ...`
-
-    var successColor = '#81C784'
-    var progressColor = '#90CAF9'
-    var successBackgroundColor = '#FAFAFA'
-    var progressBackgroundColor = '#FFFDE7'
-
-    var successIcon = <Icon type='check-circle' style={{ marginRight: '10px', color: successColor }} />
-    var progressIcon = <Icon type='hourglass' spin style={{ marginRight: '10px', color: progressColor }} />
-
-    var icon = progressIcon
-    var color = progressColor
-    var backgroundColor = progressBackgroundColor
-
-    if (status.isPublishing) {
-      alertMessage = `${this.state.productPublishingStatus || 'Getting ready to publish your product ...'}`
-    } else if (status.isCompiling) {
-      alertMessage = 'Applying changes to your product ...'
-    } else if (status.isCompiledWithoutErrors) {
-      alertMessage = 'Your product is up and running'
-      icon = successIcon
-      color = successColor
-      backgroundColor = successBackgroundColor
-    } else if (status.isCompiledWithErrors) {
-      const errors = this.state.compilation.errors
-      const errorsString = `error${errors.length > 1 ? 's' : ''}`
-      alertMessage = `Your latest changes produced ${errors.length} ${errorsString}`
-    } else if (status.isPublished) {
-      alertMessage = `Your product was successfully published`
-      // this.state.productPublishingTimestamp
-    }
-
-    return <Typography key='status' style={{
-      textAlign: 'center',
-      marginBottom: '20px',
-      color,
-      backgroundColor,
-      padding: '10px',
-      textAlign: 'center'
-    }}>
-      { icon }
-      { alertMessage }
-    </Typography>
-  }
-
-  renderProductPreview () {
-    const style = Object.assign({}, {
-      height: '100vh',
-      display: 'flex',
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '0px',
-      flexDirection: 'column',
-      backgroundColor: '#f5f5f5'
-    }, this.state.preview && {
-      marginLeft: '-300px',
-      opacity: 0.5
+    Data.Cache.cacheItem('openFiles', openFiles).then((data) => {
+      this.setState({ openFiles, primaryView: 'workspace' })
     })
+  }
 
-    return <div style={style}>
-      <Browser
-        cache={this.cache}
-        onPublish={this._onPublishProduct}
-        status={this.productStatus}
-        product={this.state.product}
-        port={this.state.port} />
-      { this.renderProductStatusPrompt() }
+  onFileClose (file) {
+    const openFiles = Object.assign({}, this.openFiles)
+    delete openFiles[file]
+
+    Data.Cache.cacheItem('openFiles', openFiles).then((data) => {
+      this.setState({ openFiles })
+    })
+  }
+
+  get openFiles () {
+    return this.state.openFiles || {}
+  }
+
+  get hasOpenFiles () {
+    return this.openFiles && Object.keys(this.openFiles).length > 0
+  }
+
+  changeProduct (productId, refresh) {
+    if (refresh) {
+      Data.Cache.clearCachedItem('openFiles')
+      .then(() => {
+        this.setState({
+          productId,
+          openFiles: {},
+          primaryView: 'workspace',
+          productStarting: true,
+          productStarted: false,
+          primaryView: "workspace",
+          inProgress: true,
+          progressMessage: 'Preparing Your Product Workspace. Just a sec, please ...'
+        })
+        this.startProduct(productId)
+        this.syncSession()
+      })
+      return
+    }
+
+    Data.Cache.clearCachedItem('openFiles')
+    .then(() => Data.Cache.cacheItem('product', { id: productId }).then((data) => {
+      this.shell.cache('productId', productId)
+      this.setState({
+        productId,
+        openFiles: {},
+        productStarting: true,
+        primaryView: "workspace",
+        productStarted: false,
+        inProgress: true,
+        progressMessage: 'Switching Your Product Workspace. Just a sec, please ...'
+      })
+      this.startProduct(productId)
+    }))
+  }
+
+  calculatePrice (level) {
+    const rate = 1
+    const factor = 5
+    const precision = 2
+    const price = (level + 1) * factor * rate
+    return price.toFixed(precision)
+  }
+
+  tokensSent (response) {
+    if (response && response.data && response.data.error) {
+      notification.error({ message: response.data.error })
+      this.setState({ inProgress: false })
+      return
+    }
+
+    this.setState({ inProgress: false })
+    this.syncSession()
+  }
+
+  failedToSendTokens (error) {
+    notification.error({ message: error.message })
+    this.setState({ inProgress: false })
+  }
+
+  onSelectChallenge ({ challengeId }) {
+    this.setState({ challengeId })
+  }
+
+  startProduct (productId) {
+    this.shell.exec('startProduct', { id: productId }, (compilation) => {
+      if (compilation.compiled && !this.state.productStarted) {
+        this.setState({ compilation, productStarted: true, inProgress: false, productStarting: false })
+        return
+      }
+
+      this.setState({ compilation })
+    })
+    .then(({ files, dir, port }) => {
+      this.setState({ files, dir, port })
+    })
+    .catch((error) => {
+      const compilation = {
+        compiled: true,
+        compiling: false,
+        errors: [error.message]
+      }
+      console.log(error)
+      this.setState({ compilation, productStarted: true, inProgress: false, productStarting: false })
+    })
+  }
+
+  get challengesTitle () {
+    return 'Challenges'
+  }
+
+  get challengesIcon () {
+    return 'landscape'
+  }
+
+  get isSecondary () {
+    return false
+  }
+
+  get screenTitle () {
+    const menuItem = this.sideMenuItem
+    return (this.state.primaryView ? (menuItem ? menuItem.title : this.challengesTitle) : super.screenTitle)
+  }
+
+  get screenIcon () {
+    const menuItem = this.sideMenuItem
+    return (this.state.primaryView ? (menuItem ? menuItem.icon : this.challengesIcon) : super.screenIcon)
+  }
+
+  get sideMenuItem () {
+    return this.menus.side.find(i => i.id === this.state.primaryView)
+  }
+
+  get challenges () {
+    return this.props.session.challenges.map(challenge => {
+      const newChallenge = Object.assign({}, challenge, this.state.userChallenges && this.state.userChallenges[challenge.id] && { history: this.state.userChallenges[challenge.id] })
+      return newChallenge
+    })
+  }
+
+  get challenge () {
+    return this.challenges.find(c => this.state.challengeId === c.id)
+  }
+
+  renderFilesPrimaryView () {
+    return this.renderScreenContentsContainer(
+      <Explorer
+        onFileOpen={this._onFileOpen}
+        dir={this.state.dir}
+        files={this.state.files}
+      />)
+  }
+
+  renderSettingsPrimaryView () {
+    return this.renderScreenContentsContainer(this.renderScreenMainMessage({
+      message: 'Product settings coming soon.'
+    }))
+  }
+
+  renderLivePrimaryView () {
+    const hide = (this.state.primaryView !== "live")
+
+    return <div
+      key='overlayLive'
+      style={{
+        position: 'absolute',
+        right: '10px',
+        bottom: '10px',
+        left: this.state.sideMenuExpanded ? '230px' : '90px',
+        top: '74px',
+        zIndex: hide ? -10 : 15
+      }}>
+        { this.renderScreenContentsContainer(<Live
+          onCloudSetupDone={this._cloudSetupDone}
+          productId={this.product.id}
+          settings={this.props.session.settings}/>, { padding: "0px" }) }
     </div>
   }
 
-  onBuyChallenge (challenge) {
-    //this.triggerRedirect(this.isLoggedIn ? '/wallet' : '/login')
-    this.onShowTask()
-  }
-
-  renderChallenge () {
-    return <div key='challenge' style={{
-      display: 'flex',
-      flex: 1,
-      width: '100%',
-      flexDirection: 'column'
-    }}>
-      <Challenge
-        onBuyChallenge={this._onBuyChallenge}
+  renderChallenges () {
+    if (this.state.challengeId) {
+      return this.renderScreenContentsContainer(<Challenge
         onSelectChallenge={this._onSelectChallenge}
+        onBuyChallenge={this._onBuyChallenge}
+        onTakeChallenge={this._onTakeChallenge}
         onStartChallenge={this._onStartChallenge}
         onTaskCompleted={this._onTaskCompleted}
         onChallengeCompleted={this._onChallengeCompleted}
@@ -394,98 +311,99 @@ export default class Workspace extends Screen {
         onStopChallenge={this._onStopChallenge}
         account={this.account}
         product={this.product}
-        onShowTask={this._onShowTask}
-        onHideTask={this._onHideTask}
         onBack={this._onUnselectChallenge}
-        challenge={this.challenge} />
-    </div>
-  }
-
-  renderChallenges () {
-    return <div key='challenges' style={{
-      display: 'flex',
-      flex: 1,
-      width: '100%',
-      flexDirection: 'column'
-    }}>
-      <Challenges
-        challenges={this.challenges}
-        onSelectChallenge={this._onSelectChallenge} />
-    </div>
-  }
-
-  renderPopup () {
-    if (!this.state.showPopup) {
-      return <div key='popupContainer' />
+        challenge={this.challenge} />)
     }
 
-    return <PopupMessage
-      key='popupContainer'
-      buttonTitle={this.state.popupButtonTitle}
-      icon={this.state.popupIcon}
-      title={this.state.popupTitle}
-      message={this.state.popupMessage}
-      onClose={() => this.setState({ showPopup: false })}
-      message={this.state.popupMessage} />
+    return this.renderScreenContentsContainer(<Challenges
+      challenges={this.challenges}
+      account={this.account}
+      onSelectChallenge={this._onSelectChallenge} />)
   }
 
-  renderScreenLayout () {
-    const w = this.width
-    const wSide = (w / 2)
-    const wContent = this.state.preview ? w - 5 : wSide
+  renderDefaultPrimaryView () {
+    if (this.state.productStarted) {
+      return <Browser
+        cache={this.cache}
+        status={this.productStatus}
+        product={this.product}
+        port={this.state.port} />
+    }
+
+    return <div>
+      <Typography use='overline' style={{
+        display: 'flex',
+        color: 'rgba(0, 16, 31, 1)',
+        flex: 1
+      }}>
+        { this.product.name } is not ready yet.
+      </Typography>
+    </div>
+  }
+
+  renderDefaultSideView () {
+    if (!this.hasOpenFiles) {
+      return <div />
+    }
 
     return <div style={{
-      backgroundColor: '#f5f5f5',
-      display: 'flex',
+      marginRight: '10px',
       flex: 1,
-      height: '100vh',
-      width: '100vw',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center'
+      maxWidth: '35vw'
     }}>
-      { this.renderPopup() }
-      <Layout key='workspace'
-        style={{ height: '100vh' }}>
-        <Sider
-          key='preview'
-          trigger={null}
-          collapsible
-          width={`${wSide}px`}
-          style={{
-            borderRight: '1px #CFD8DC solid',
-            height: '100vh'
-          }}
-          collapsedWidth={'0px'}
-          collapsed={this.state.preview}>
-          { this.renderProductPreview() }
-        </Sider>
-        <Layout
-          key='content'
-          style={{
-            display: 'flex',
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column',
-            height: '100vh',
-            backgroundColor: '#f5f5f5',
-            width: `${wContent}px`
-          }}>
-          <WorkspaceContent
-            account={this.account}
-            onTogglePreview={this._onTogglePreview}
-            onProductOption={this._onProductOption}
-            onScreenChanged={this._onScreenChanged}
-            product={this.product}
-            isProductPublishing={this.state.productPublishing}
-            isProductStarting={this.state.productStarting}
-            challengeId={this.state.challengeId}
-            dir={this.state.dir}>
-            { this.state.challengeId ? this.renderChallenge() : this.renderChallenges() }
-          </WorkspaceContent>
-        </Layout>
-      </Layout>
+      <Editor
+        onFileClose={this._onFileClose}
+        key={'editor'}
+        files={this.openFiles}
+      />
     </div>
+  }
+
+  renderOverlay () {
+    switch (this.state.primaryView) {
+      case 'files':
+        return this.renderFilesPrimaryView()
+      case 'settings':
+        return this.renderSettingsPrimaryView()
+      case 'challenges':
+        return this.renderChallenges()
+      default:
+    }
+
+    return <div />
+  }
+
+
+  renderScreenContents () {
+    return [<div
+      key='main'
+      style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%'
+      }}>
+      { this.renderDefaultSideView() }
+      <div style={{
+        flex: 1
+      }}>
+        { this.renderDefaultPrimaryView() }
+      </div>
+    </div>, this.state.primaryView !== 'workspace' &&
+      <div
+        key='overlay'
+        style={{
+          position: 'absolute',
+          right: '10px',
+          bottom: '10px',
+          left: this.state.sideMenuExpanded ? '230px' : '90px',
+          top: '74px',
+          zIndex: 10
+        }}>
+        {
+          this.renderOverlay()
+        }
+      </div>,
+      this.renderLivePrimaryView()]
   }
 }

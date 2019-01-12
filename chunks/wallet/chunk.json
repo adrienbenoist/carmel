@@ -2,9 +2,9 @@
   "name": "wallet",
   "routes": {
     "main": {
-      "title": "Wallet",
-      "icon": "appstore",
-      "path": "/wallet",
+      "title": "Credits",
+      "icon": "account_balance_wallet",
+      "path": "/credits",
       "layoutBackground": "#f5f500",
       "cover": {
         "backgroundColor": "#00838F",
@@ -13,6 +13,13 @@
       },
       "startOperationsOnMount": false,
       "operations": {
+        "checkout": [
+          "rest://create/wallet/checkout#checkout",
+          {
+            "onSuccess": "checkoutOk",
+            "onError": "checkoutError"
+          }
+        ],
         "sendTokens": [
           "rest://create/wallet/send#sendTokens",
           {
@@ -20,41 +27,35 @@
             "onError": "failedToSendTokens"
           }
         ],
-        "getWallet": [
+        "refreshWallet": [
           "firebase://retrieve/users-wallets/:userId?latest=1&resolve=wallets#getWallet",
           {
-            "onSuccess": "gotWallet",
-            "onError": "failedToGetWallet"
+            "onSuccess": "refreshedWallet",
+            "onError": "failedToRefreshWallet"
           }
         ]
       }
-    },
-    "checkout": {
-      "title": "Account",
-      "icon": "account_circle",
-      "alwaysShowIcon": true,
-      "guestOnly": true,
-      "path": "/checkout",
-      "cover": {
-        "backgroundColor": "#00838F",
-        "opacity": 0.6,
-        "navigation": true,
-        "image": "chris.r.png",
-        "title": "checkout",
-        "type": "simple"
-      },
-      "startOperationsOnMount": false,
-      "operations": {}
     }
   },
   "service": {
     "functions": [
       "post://send#sendTokens",
-      "post://achievements#newAchievement"
+      "post://achievements#newAchievement",
+      "post://topup#newTopup",
+      "post://checkout#checkout"
     ],
-    "dependencies": {},
+    "dependencies": {
+      "braintree": "latest"
+    },
     "requiredFields": {},
-    "permissions": {},
+    "permissions": {
+      "newTopup": [
+        "ses:SendEmail"
+      ],
+      "checkout": [
+        "ses:SendEmail"
+      ]
+    },
     "schedule": {}
   }
 }

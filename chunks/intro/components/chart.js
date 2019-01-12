@@ -1,29 +1,27 @@
 import React from 'react'
 import { Component } from 'react-dom-chunky'
-import { PieChart, LabelList, Pie, Sector, Cell } from 'recharts'
+import { PieChart, LabelList, Pie, Sector, Cell, Label, Legend } from 'recharts'
 
 const data = [
-  { name: 'Private Sale', value: 3.5, id: '0', percent: '5%' },
-  { name: 'AirDrop', value: 3.5, id: '1', percent: '5%' },
-  { name: 'Pre-Sale', value: 7, id: '1', percent: '10%' },
-  { name: 'Public Sale', value: 28, id: '2', percent: '40%' },
-  { name: 'Fluid Fund', value: 7, id: '3', percent: '10%' },
-  { name: 'Founders Fund', value: 14, id: '4', percent: '20%' },
-  { name: 'Partners Fund', value: 7, id: '5', percent: '10%' }
+  { name: 'EOS ShareDrop', value: 5, id: '0', percent: '50%' },
+  { name: 'Private Distribution', value: 1, id: '1', percent: '10%' },
+  { name: 'Founders Fund', value: 2, id: '2', percent: '20%' },
+  { name: 'Partners Fund', value: 1, id: '3', percent: '10%' },
+  { name: 'Fluid Fund', value: 1, id: '4', percent: '10%' }
 ]
 
-const COLORS = ['#66BB6A', '#43A047', '#2E7D32', '#00796B', '#1976D2', '#1A237E', '#0D47A1']
+const COLORS = ['#66BB6A', '#00796B', '#1976D2', '#1A237E', '#0D47A1']
 const RADIAN = Math.PI / 180
 
 export default class ChartComponent extends Component {
   renderCustomizedLabel ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) {
-    const radius = innerRadius + (outerRadius - innerRadius) * 1.1
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5
     const x = cx + radius * Math.cos(-midAngle * RADIAN)
     const y = cy + radius * Math.sin(-midAngle * RADIAN)
 
     return (
-      <text x={x} y={y} fill='black' textAnchor={x > cx ? 'start' : 'end'} dominantBaseline='central'>
-        { data[index].name }
+      <text x={x} y={y} fill='white' textAnchor={x > cx ? 'start' : 'end'} dominantBaseline='central'>
+        { data[index].percent }
       </text>
     )
   }
@@ -87,7 +85,7 @@ export default class ChartComponent extends Component {
     const cy = this.props.isSmallScreen ? 120 : 230
 
     return (
-      <PieChart width={width} height={height} onMouseEnter={this.onPieEnter}>
+      <PieChart width={width} height={height} onMouseEnter={this.onPieEnter} style={{margin: 'auto'}}>
         <Pie
           dataKey='value'
           data={data}
@@ -98,12 +96,10 @@ export default class ChartComponent extends Component {
           outerRadius={radius}
           fill='#8884d8'>
           {
-          data.map((entry, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)
-        }
-          <LabelList
-            dataKey='percent'
-            position='inside' />
+            data.map((entry, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)
+          }
         </Pie>
+        <Legend verticalAlign={'bottom'} iconSize={'17'} height={50} />
       </PieChart>
     )
   }

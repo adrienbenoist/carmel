@@ -1,20 +1,17 @@
 import React from 'react'
-import { Screen } from 'react-dom-chunky'
+import { Screen, Components } from 'react-dom-chunky'
 import { Telegram } from '../components'
 import { BuyModal } from '../components'
-
-import { Parallax } from 'react-spring'
+import Bounce from 'react-reveal/Bounce'
+import Fade from 'react-reveal/Fade'
 import Intro from '../components/intro'
-import Studio from '../components/studio'
-import Tokens from '../components/tokens'
-import Team from '../components/team'
-import TeamAction from '../components/action'
-import Footer from '../components/footer'
-import WhySection from '../components/why'
-import PlatformSection from '../components/platform'
+import About from '../components/about'
+import Chat from '../components/chat'
+import { Button, ButtonIcon } from 'rmwc/Button'
+import { Typography } from '@rmwc/typography'
 
 export default class MainIntroScreen extends Screen {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = { ...this.state, showModal: false }
 
@@ -26,83 +23,70 @@ export default class MainIntroScreen extends Screen {
     this._showTeam = this.showTeam.bind(this)
   }
 
-  componentDidMount () {
+  renderStakeholders() {
+    return <About compact={this.isSmallScreen} />
+  }
+
+  componentDidMount() {
     super.componentDidMount()
   }
 
-  onStart () {
-    this.scroller.scrollTo(1)
+  onStart() {
+    this.triggerRedirect('/pricing')
   }
 
-  meetChris () {
+  meetChris() {
     this.triggerRedirect('/whitepaper')
   }
 
-  showTeam () {
+  showTeam() {
     this.triggerRedirect('/team')
   }
 
-  onContinue (index) {
+  onContinue(index) {
     this.scroller.scrollTo(index)
   }
 
-  download () {
+  download() {
     this.triggerRedirect('/download')
   }
 
-  renderDefault () {
-    // <Studio
-    //   session={this.props.session}
-    //   offset={1}
-    //   onContinue={this._download} /> */}
-    // <Tokens
-    //   session={this.props.session}
-    //   offset={1}
-    //   triggerRawRedirect={this.triggerRawRedirect}
-    //   newTransaction={this.props.newTransaction}
-    //   onCancel={this._onModalClose}
-    //   transaction={this.state.transaction}
-    //   account={this.props.account}
-    //   isSmallScreen={this.isSmallScreen}
-    // />
-    // <Team
-    //   session={this.props.session}
-    //   isSmallScreen={this.isSmallScreen}
-    //   offset={2}
-    // />
-    return <div>
-      <Intro
-        session={this.props.session}
-        offset={0}
-        isSmallScreen={this.isSmallScreen}
-        onStart={this._onStart}
-        onContinue={this._onContinue.bind(this, 1)}
-      />
-
-      <WhySection
-        onContinue={this._download}
-      />
-      <PlatformSection />
-      <Team
-        session={this.props.session}
-        isSmallScreen={this.isSmallScreen}
-      />
-    </div>
+  renderDefault() {
+    return (
+      <div>
+        <Intro
+          offset={0}
+          isSmallScreen={this.isSmallScreen}
+          onStart={this._onStart}
+          onContinue={this._onContinue.bind(this, 1)}
+        />
+      </div>
+    )
   }
 
-  get height () {
+  get height() {
     return '100vh'
   }
 
-  get isSmallScreen () {
+  get isSmallScreen() {
     return this.state.width < 1224
   }
 
-  get telegram () {
-    return (<Telegram onAction={() => { this.triggerRawRedirect('https://t.me/carmelplatform') }} />)
+  get telegram() {
+    return (
+      <Telegram
+        onAction={() => {
+          this.triggerRawRedirect('https://t.me/carmelplatform')
+        }}
+      />
+    )
   }
 
-  transactionOk (transaction) {
+  get chat() {
+    return <Chat {...this.props} />
+  }
+
+  transactionOk(transaction) {
     if (transaction.error) {
       this.setState({ error: transaction.error })
       return
@@ -111,17 +95,111 @@ export default class MainIntroScreen extends Screen {
     this.setState({ transaction })
   }
 
-  transactionError (error) {
+  transactionError(error) {
     this.setState({ error: error.message })
   }
 
-  components () {
-    const features = super.components()
-    return [...features, this.renderDefault(), this.telegram]
+  renderServicesAction() {
+    return (
+      <div
+        style={{
+          width: '100vw',
+          display: 'flex',
+          flex: 1,
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#f3ffff',
+          color: this.props.theme.primaryColor,
+          margin: '50px 0px 50px 0px',
+          padding: '50px 0px 50px 0px'
+        }}
+      >
+        <Typography
+          use="headline4"
+          style={{
+            textAlign: 'center'
+          }}
+        >
+          Need help with your Website or Mobile App?
+        </Typography>
+        <Typography
+          use="headline4"
+          style={{
+            textAlign: 'center',
+            color: '#fafafa'
+          }}
+        >
+          <Button
+            raised
+            theme="secondary-bg text-primary-on-secondary"
+            style={{ marginTop: '30px' }}
+            onClick={() => this.triggerRedirect('/services')}
+          >
+            <ButtonIcon icon="check" />
+            Get A FREE Quote Now
+          </Button>
+        </Typography>
+      </div>
+    )
   }
 
-  onModalClose () {
+  renderMainAction() {
+    return (
+      <div
+        style={{
+          width: '100vw',
+          display: 'flex',
+          flex: 1,
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#f3ffff',
+          color: this.props.theme.primaryColor,
+          margin: '50px 0px 50px 0px',
+          padding: '50px 0px 50px 0px'
+        }}
+      >
+        <Typography
+          use="headline4"
+          style={{
+            textAlign: 'center'
+          }}
+        >
+          Wanna see the Carmel Studio in action?
+        </Typography>
+        <Typography
+          use="headline4"
+          style={{
+            textAlign: 'center',
+            color: '#fafafa'
+          }}
+        >
+          <Button
+            raised
+            theme="secondary-bg text-primary-on-secondary"
+            style={{ marginTop: '30px' }}
+            onClick={() => this.triggerRedirect('/beta')}
+          >
+            <ButtonIcon icon="check_circle" />
+            Become An Early Adopter
+          </Button>
+        </Typography>
+      </div>
+    )
+  }
+
+  components() {
+    const features = super.components()
+    return [
+      this.renderDefault(),
+      ...features,
+      this.renderMainAction(),
+      this.chat
+    ]
+  }
+
+  onModalClose() {
     this.setState({ showModal: false })
   }
-
 }

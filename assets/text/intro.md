@@ -1,3 +1,3 @@
-# Welcome to Carmel
+# A better way to learn to code
 
-## The **Decentralized Open Source Tech Education Platform** that helps aspiring and seasoned Software Developers **grow their skill set** and **track their growth** through tokenized peer challenges.
+## The Carmel Tweak-N-Learn™ Tech Educational Model is a radical departure from traditional video courses and helps you acquire new technical skills faster and more effectively, in a professional development environment.
