@@ -171,6 +171,7 @@ export default class Challenge extends Component {
 
     //  end commented before the merged above 06/10/18
 
+    // current to not have the token
     const started = !this.state.started
     
     const taskIndex = 1
@@ -182,6 +183,8 @@ export default class Challenge extends Component {
     this.shell.cache('taskId', started ? task.id : '')
     
     this.setState({ started, taskIndex, task, showTask: started })
+
+    //-------under is the last version
     // if (this.isStarted) {
     //   this.props.onStopChallenge && this.props.onStopChallenge({ challengeId: this.props.challenge.id })
     //   this.setState({ started: false, showTask: false, taskIndex: 1 })
