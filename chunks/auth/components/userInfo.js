@@ -4,7 +4,7 @@
   import { Chip, ChipText, ChipIcon, ChipSet } from '@rmwc/chip'
   import { Button } from '@rmwc/button'
   import { notification, Tooltip } from 'antd'
-  import { Icon } from '@rmwc/icon'
+  import Meta from './meta'
 
   const ReservedMessage = `Congrats on your reserved CARMEL tokens! To transfer them to your Carmel Wallet, please complete the claiming process below.`
 
@@ -132,8 +132,31 @@
       </Tooltip>
     }
 
+    renderLiveTokens () {
+      if (!this.props.tokens || !this.props.tokens.carmel) {
+        return <div/>
+      }
+
+      return <div style={{
+        textAlign: 'left',
+        marginBottom: '20px',
+        paddingBottom: '20px'
+      }}>
+        <Typography use='subheading1' tag='h2' style={{ textAlign: 'left' }}>
+          <ChipSet>
+            <Chip style={{ backgroundColor: (this.tokens > 0 ? '#006A4E' : '#CFD8DC'), marginLeft: 0 }}>
+              <ChipText style={{ color: (this.tokens > 0 ? '#ffffff' : '#B0BEC5') }}>
+                <strong> {this.props.tokens.carmel.toLocaleString('en')} </strong>
+              </ChipText>
+            </Chip>
+            { this.renderClaimed() }
+          </ChipSet>
+        </Typography>
+      </div>
+    }
+
     renderTokens () {
-      if (this.props.skipWallet) {
+      if (this.props.skipWallet || !this.tokens || this.tokens <= 0) {
         return <div style={{
           marginBottom: '20px',
           paddingBottom: '20px',
@@ -144,24 +167,24 @@
       return <div style={{
         textAlign: 'left',
         marginBottom: '20px',
-        paddingBottom: '20px',
-        borderBottom: '1px solid #EEEEEE'
+        paddingBottom: '20px'
       }}>
         <Typography use='subheading1' tag='h2' style={{ textAlign: 'left' }}>
           <ChipSet>
-            <Chip style={{ backgroundColor: (this.tokens > 0 ? '#006A4E' : '#CFD8DC') }}>
-              <ChipText style={{ color: (this.tokens > 0 ? '#ffffff' : '#B0BEC5') }}>
-                <strong> {this.tokens.toLocaleString('en')} CARMEL </strong>
+            <Chip style={{ backgroundColor: '#607D8B', marginLeft: 0 }}>
+              <ChipText style={{ color: '#ffffff' }}>
+                <strong> {this.tokens.toLocaleString('en')} unclaimed </strong>
               </ChipText>
             </Chip>
-            { this.renderClaimed() }
-            {/* <ChipIcon style={{ color: '#B0BEC5', marginLeft: '5px', marginTop: '-5px' }} icon={`help`} /> */}
           </ChipSet>
         </Typography>
       </div>
     }
 
     render () {
+
+      const user = this.props.account.user
+
       return (
         <div>
           <div
@@ -185,22 +208,14 @@
               flexDirection: 'column',
               alignItems: 'left'
             }}>
-
-              <Typography
-                use='headline5'
-                tag='h2'
-                style={{
-                  display: 'flex',
-                  flex: 6,
-                  marginLeft: '5px',
-                  justifyContent: 'flex-start'
-                }}>
-                {this.name}
-              </Typography>
+             <Meta user={user} />
             </div>
+          </div>
+          <div style={{display: 'flex'}}>
+            { this.renderLiveTokens() }
+            { this.renderTokens() }
             { this.renderVerification() }
           </div>
-          { this.renderTokens() }
           { this.renderMainAction() }
         </div>)
     }
