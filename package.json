@@ -140,7 +140,6 @@
     "mocha": "^5.2.0",
     "mousetrap": "^1.6.2",
     "napajs": "^0.2.3",
-    "node-gyp": "^3.8.0",
     "node-fetch": "^2.2.0",
     "nodegit": "^0.22.2",
     "nuka-carousel": "^4.3.5",
