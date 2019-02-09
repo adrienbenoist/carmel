@@ -9,6 +9,19 @@ import About from '../components/about'
 import Chat from '../components/chat'
 import { Button, ButtonIcon } from 'rmwc/Button'
 import { Typography } from '@rmwc/typography'
+import teamData from '../data/team'
+import { Col, Row, Carousel, Icon } from 'antd'
+import moment from 'moment'
+import {
+  Card,
+  CardPrimaryAction,
+  CardMedia,
+  CardAction,
+  CardActions,
+  CardActionButtons,
+  CardActionIcons
+} from '@rmwc/card'
+import Slider from 'react-slick'
 
 export default class MainIntroScreen extends Screen {
   constructor(props) {
@@ -21,6 +34,16 @@ export default class MainIntroScreen extends Screen {
     this._onContinue = this.onContinue.bind(this)
     this._download = this.download.bind(this)
     this._showTeam = this.showTeam.bind(this)
+    this.next = this.next.bind(this)
+    this.previous = this.previous.bind(this)
+    this.carousel = React.createRef()
+  }
+
+  next() {
+    this.carousel.next()
+  }
+  previous() {
+    this.carousel.prev()
   }
 
   renderStakeholders() {
@@ -29,10 +52,36 @@ export default class MainIntroScreen extends Screen {
 
   componentDidMount() {
     super.componentDidMount()
+
+    this._loadStoryContent()
+  }
+
+  _loadStoryContent() {
+    const self = this
+
+    this.importRemoteData(`${this.props.storySource}/story.json`)
+      .then(storyData => {
+        self.setState({ storyData })
+      })
+      .catch(error => console.log(error))
+
+    this.importRemoteData(`${this.props.testimonialsSource}`)
+      .then(testimonialsData => {
+        self.setState({ testimonialsData })
+      })
+      .catch(error => console.log(error))
+  }
+
+  date = date => {
+    if (date) {
+      return moment(date, 'x').format('DD MMMM YYYY')
+    }
+
+    return ''
   }
 
   onStart() {
-    this.triggerRedirect('/challenges')
+    this.triggerRedirect('/learners')
   }
 
   meetChris() {
@@ -189,12 +238,254 @@ export default class MainIntroScreen extends Screen {
     )
   }
 
+  renderLatestChapters() {
+    if (!this.state.storyData) return <div />
+
+    return (
+      <div
+        style={{
+          marginTop: '50px',
+          display: 'flex',
+          flex: 1,
+          justifyContent: 'center',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}
+      >
+        <Typography use="headline4" style={{ margin: '50px 20px 20px' }}>
+          Follow The Carmel Story
+        </Typography>
+        {this.isSmallScreen
+          ? this.renderCompactStoryCard()
+          : this.renderDefaultStoryCard()}
+      </div>
+    )
+  }
+
+  renderCompactStoryCard() {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flex: 1,
+          justifyContent: 'center',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginTop: '30px'
+        }}
+      >
+        {Object.keys(this.state.storyData.chapters)
+          .slice(-3)
+          .map(c => this.renderStoryCard(this.state.storyData.chapters[c]))}
+      </div>
+    )
+  }
+
+  renderDefaultStoryCard() {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flex: 1,
+          justifyContent: 'center',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginTop: '30px'
+        }}
+      >
+        <Row gutter={16}>
+          {Object.keys(this.state.storyData.chapters)
+            .slice(0, 3)
+            .map(c => (
+              <Col span={8}>
+                {this.renderStoryCard(this.state.storyData.chapters[c])}
+              </Col>
+            ))}
+        </Row>
+      </div>
+    )
+  }
+
+  renderStoryCard(chapter) {
+    const { title, summary, image, slug } = chapter
+
+    return (
+      <Card
+        style={{
+          margin: '10px',
+          minWidth: '300px',
+          maxWidth: '450px',
+          maxHeight: '400px'
+        }}
+        onClick={() => slug && this.props.history.push(`/story/${slug}`)}
+      >
+        <CardPrimaryAction
+          style={{
+            justifyContent: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}
+        >
+          <CardMedia
+            sixteenByNine
+            style={{
+              marginTop: '10px',
+              width: '200px',
+              height: '200px',
+              backgroundImage: `url(${image}})`
+            }}
+          />
+          <div style={{ padding: '10px' }}>
+            <Typography use="headline5" tag="h1">
+              {title}
+            </Typography>
+            <Typography
+              use="headline6"
+              tag="h2"
+              theme="text-secondary-on-background"
+              style={{
+                margin: '1rem',
+                textAlign: 'center',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                maxHeight: '60px'
+              }}
+            >
+              {summary}
+            </Typography>
+          </div>
+          <CardActions style={{ justifyContent: 'center' }}>
+            <Button
+              onClick={() => slug && this.props.history.push(`/story/${slug}`)}
+              style={{
+                margin: '10px 0px 30px 0px',
+                color: '#ffffff',
+                backgroundColor: '#04bdd4'
+              }}
+            >
+              <ButtonIcon icon="library_books" style={{ marginLeft: '5px' }} />
+              Read more
+              <ButtonIcon icon="arrow_forward" style={{ marginLeft: '5px' }} />
+            </Button>
+          </CardActions>
+        </CardPrimaryAction>
+      </Card>
+    )
+  }
+
+  renderTestimonials() {
+    if (!this.state.testimonialsData) return <div />
+
+    const settings = {
+      dots: true,
+      infinite: true,
+      speed: 500,
+      slidesToShow: 1,
+      slidesToScroll: 1
+    }
+
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <Typography
+          use="headline3"
+          style={{
+            margin: '20px'
+          }}
+        >
+          What other people say about CARMEL
+        </Typography>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            margin: '30px 20px 10px'
+          }}
+        >
+          <Icon
+            type="left"
+            onClick={this.previous}
+            style={{ color: '#04bdd4', fontSize: '20px', cursor: 'pointer' }}
+          />
+          <Carousel
+            ref={node => (this.carousel = node)}
+            className={'testimonials'}
+            {...settings}
+          >
+            {this.state.testimonialsData.map(t =>
+              this.renderTestimonialCard(t)
+            )}
+          </Carousel>
+          <Icon
+            type="right"
+            onClick={this.next}
+            style={{ color: '#04bdd4', fontSize: '20px', cursor: 'pointer' }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  renderTestimonialCard(testimonial) {
+    const { text, image, name, description } = testimonial
+
+    return (
+      <Row gutter={16}>
+        <Col xs={24} sm={4}>
+          {image && (
+            <img
+              style={{
+                width: '80px',
+                height: '80px',
+                margin: '20px auto',
+                borderRadius: '50%'
+              }}
+              src={image}
+            />
+          )}
+        </Col>
+        <Col xs={24} sm={20}>
+          <p style={{ fontStyle: 'italic', padding: '20px 15px 0 0' }}>
+            "{text}"
+          </p>
+          <p style={{ fontWeight: 'bold' }}>
+            {name} - {description}
+          </p>
+        </Col>
+      </Row>
+    )
+  }
+
+  renderTeamHeader() {
+    return (
+      <div style={{ margin: '60px 0 10px' }}>
+        <Typography
+          use="headline3"
+          style={{
+            textAlign: 'center'
+          }}
+        >
+          Meet the team
+        </Typography>
+      </div>
+    )
+  }
+
+  renderTeam() {
+    return <Components.Team {...teamData} />
+  }
+
   components() {
     const features = super.components()
     return [
       this.renderDefault(),
       ...features,
-      this.renderMainAction(),
+      this.renderTestimonials(),
+      this.renderLatestChapters(),
+      this.renderTeamHeader(),
+      this.renderTeam(),
+      // this.renderMainAction(),
       this.chat
     ]
   }

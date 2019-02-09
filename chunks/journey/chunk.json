@@ -5,8 +5,8 @@
       "title": "journey",
       "icon": "favorite",
       "skipMenu": true,
-      "path": "/journey",
-      "variants": "initial",
+      "path": "/",
+      "variants": true,
       "stories": [{
         "source": "https://raw.githubusercontent.com/idancali/cellar/master/stories/carmel/story.json"
       }],
@@ -21,6 +21,23 @@
         "title": "Carmel Journeys",
         "type": "default",
         "image": "beta.r.png"
+      },
+      "startOperationsOnMount": false,
+      "operations": {
+        "getUserProfile": [
+          "rest://create/auth/profiles#profile",
+          {
+            "onSuccess": "getUserOk",
+            "onError": "getUserError"
+          }
+        ],
+        "getListings": [
+          "rest://create/journey/listings#getListings",
+          {
+            "onSuccess": "gotListings",
+            "onError": "couldNotGetListings"
+          }
+        ]
       }
     }
   },
@@ -28,11 +45,14 @@
     "functions": [
       "post://activities#newActivity",
       "post://challenges#newChallenge",
+      "post://listings#getListings",
       "post://journeys#updateJourney"
     ],
     "dependencies": {
       "slugify": "latest",
-      "deepmerge": "latest"
+      "deepmerge": "latest",
+      "casual": "latest",
+      "node-wit": "latest"
     },
     "requiredFields": {
     },

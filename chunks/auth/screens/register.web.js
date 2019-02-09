@@ -1,13 +1,14 @@
 import React from 'react'
-import { Screen } from 'react-dom-chunky'
+import { Screen, Components } from 'react-dom-chunky'
 import {
   Card,
   CardActions,
   CardActionButtons
 } from 'rmwc/Card'
+import { Data } from 'react-chunky'
 import { Button, ButtonIcon } from 'rmwc/Button'
 import { Typography } from 'rmwc/Typography'
-import { Form, Input, Icon } from 'antd'
+import { Form, Input, Icon, Alert, Select } from 'antd'
 import Recaptcha from 'react-recaptcha'
 const FormItem = Form.Item
 
@@ -18,11 +19,15 @@ export default class RegisterScreen extends Screen {
     this._done = this.done.bind(this)
     this._login = this.login.bind(this)
     this.onKeyPress = this.onKeyPress.bind(this)
-    this.state = { ...super.state }
+    this.state = { ...super.state, inProgress: true, }
   }
 
   componentDidMount () {
     super.componentDidMount()
+
+    Data.Cache.retrieveCachedItem('guestSession')
+              .then((guestSession) => this.setState({ guestSession, inProgress: false }))
+              .catch((e) => this.setState({ inProgress: false }))
   }
 
   done () {
@@ -33,6 +38,11 @@ export default class RegisterScreen extends Screen {
 
     if (!this.state.username) {
       this.setState({ error: errors.username, errorType: 'username', loading: false })
+      return
+    }
+
+    if (!this.state.guild) {
+      this.setState({ error: errors.guild, errorType: 'guild', loading: false })
       return
     }
 
@@ -49,6 +59,7 @@ export default class RegisterScreen extends Screen {
       })
       return
     }
+    
 
     if (!this.state.password2) {
       this.setState({
@@ -83,15 +94,19 @@ export default class RegisterScreen extends Screen {
     const pics = ['https://github.com/fluidtrends/carmel/blob/master/assets/avatars/avatar1.png?raw=true', 'https://github.com/fluidtrends/carmel/blob/master/assets/avatars/avatar2.png?raw=true', 'https://github.com/fluidtrends/carmel/blob/master/assets/avatars/avatar3.png?raw=true', 'https://github.com/fluidtrends/carmel/blob/master/assets/avatars/avatar4.png?raw=true', 'https://github.com/fluidtrends/carmel/blob/master/assets/avatars/avatar5.png?raw=true', 'https://github.com/fluidtrends/carmel/blob/master/assets/avatars/avatar6.png?raw=true']
     const rand = this.random(1, 6)
 
+    const extra = Object.assign({}, this.state.guestSession)
+    extra && extra.alert && delete extra.alert
+
     setTimeout(() => {
-      this.props.register({
+      this.props.register(Object.assign({}, {
         name: this.state.name,
         username: this.state.username,
+        guild: this.state.guild,
         email: this.state.email,
         pic: pics[rand],
         bio: bios[rand],
         password: this.state.password
-      })
+      }, extra))
     }, 300)
   }
 
@@ -181,6 +196,21 @@ export default class RegisterScreen extends Screen {
           placeholder={placeholders.username} />
       </FormItem>
       <FormItem>
+        <Select
+          style={{ width: '100%' }}
+          className={'guild-select-wrapper'}
+          placeholder="Select a guild"
+          onChange={val => this.setState({guild: val, error: ''})}
+        >
+          <Option value="learner">Learner</Option>
+          <Option value="developer">Developer</Option>
+          <Option value="entrepreneur">Entrepreneur</Option>
+          <Option value="teacher">Teacher</Option>
+          <Option value="manager">Manager</Option>
+          <Option value="recruiter">Recruiter</Option>
+        </Select>
+      </FormItem>
+      <FormItem>
         <Input
           value={this.state.email}
           style={{ height: '48px' }}
@@ -224,7 +254,7 @@ export default class RegisterScreen extends Screen {
           fontSize: '64px',
           padding: '10px'
         }} />
-        <Typography use='headline' tag='h3'>
+        <Typography use='headline' tag='h2'>
           Create Your Carmel Account
         </Typography>
       </div>
@@ -277,6 +307,7 @@ export default class RegisterScreen extends Screen {
   }
 
   renderForm () {
+    console.log(this.state.guestSession)
     const width = this.formWidth
     const padding = this.formPadding
     return (
@@ -288,14 +319,30 @@ export default class RegisterScreen extends Screen {
     )
   }
 
+  renderAlert() {
+    if (!this.state.guestSession || !this.state.guestSession.alert) {
+      return <div/>
+    }
+
+    return <Alert
+      message={this.state.guestSession.alert}
+      banner
+      closable
+    />
+  }
+
   components () {
-    return [this.renderForm()]
+    if (this.state.inProgress) {
+      return [<Components.Loading/>]
+    }
+
+    return [this.renderAlert(), this.renderForm()]
   }
 }
 
 const placeholders = {
   name: 'Please enter your full name',
-  username: 'Please enter your username',
+  username: 'Please choose your username',
   email: 'Please enter your email address',
   password: 'Please choose a password',
   password2: 'Please confirm your password'
@@ -305,6 +352,7 @@ const errors = {
   name: "Don't forget your name",
   username: "Don't forget your username",
   email: "Don't forget your email address",
+  guild: "Don't forget to select a guild",
   password: 'Please choose a password',
   password2: 'Please confirm your password',
   passwordMismatch: 'Please make sure your passwords match',

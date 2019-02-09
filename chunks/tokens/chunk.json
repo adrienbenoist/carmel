@@ -2,10 +2,9 @@
   "name": "tokens",
   "routes": {
     "main": {
-      "title": "Get Tokens",
+      "title": "Tokens",
       "icon": "favorite",
       "path": "/tokens",
-      "action": true,
       "guestOnly": true,
       "privateRedirect": "/me/tokens",
       "events": {
@@ -14,11 +13,11 @@
       "cover": {
         "backgroundColor": "#00838F",
         "align": "bottom",
-        "opacity": 0.5,
-        "image": "background-stars.r.png",
+        "opacity": 0.6,
+        "image": "tokens.r.png",
         "navigation": true,
-        "title": "Own A Piece Of Carmel",
-        "type": "simple"
+        "title": "Pre-listing token distribution LIVE",
+        "type": "default"
       },
       "startOperationsOnMount": false,
       "operations": {

@@ -451,14 +451,19 @@ strong {
 }
 
 .ant-carousel {
-  height: 300px;
-  width: 90vw;
+  width: 60vw;
   margin: 15px 50px;
   box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 20px 0px;
 }
+@media only screen and (max-width: 576px) {
+  .ant-carousel {
+    width: 80vw;
+    margin: 15px;
+  }
+}
 
 .ant-carousel .slick-slide {
-  height: 300px;
+  min-height: 300px;
 }
 
 .ant-carousel .slick-dots li button {
@@ -473,13 +478,34 @@ strong {
   display: none;
 }
 
+.ant-tabs-tab-prev-icon:before {
+  display: none;
+}
+
+.ant-tabs-tab-next-icon:before {
+  display: none;
+}
+
 .challenge-card {
+  height: 100%;
+}
+
+.future-challenge-card {
   height: 100%;
 }
 
 .challenge-card .ant-card-head {
   padding-right: 0;
   padding-left: 10px;
+}
+
+.future-challenge-card .ant-card-head {
+  padding-right: 0;
+  padding-left: 10px;
+}
+
+.future-challenge-card .ant-card-body {
+  padding: 0;
 }
 
 .timeline-wrapper .ant-progress-bg {
@@ -492,4 +518,27 @@ strong {
 
 .timeline-wrapper .anticon-check-circle {
   color: #00796b;
+}
+
+.plans-list-wrapper i {
+  color: #2e7d32;
+}
+
+.guild-select-wrapper .ant-select-selection--single {
+  height: 48px;
+  padding-top: 8px;
+}
+
+.testimonials {
+  position: relative;
+  min-height: 350px;
+  margin: 50px 0;
+  padding: 20px;
+}
+.testimonials .slick-dots button::before {
+  display: none;
+}
+
+.ant-modal-close i {
+  display: none;
 }

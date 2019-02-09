@@ -10,6 +10,7 @@ import {
 } from '../components'
 import { Typography } from '@rmwc/typography'
 import { List, Icon, notification } from 'antd'
+import Distribution from '../components/distribution'
 
 import moment from 'moment'
 
@@ -233,6 +234,12 @@ export default class PrivateTokensScreen extends Screen {
     return this.state.account.socialNetworksValid
   }
 
+  renderDistribution(width, padding) {
+    return <div style={{textAlign: 'center'}}> 
+      <Distribution isSmallScreen={this.isSmallScreen} />
+    </div>
+  }
+
   renderClaim () {
     if (!this.state.period || !this.state.account) {
       return <Components.Loading message='Loading claim period details ...' />
@@ -309,16 +316,7 @@ export default class PrivateTokensScreen extends Screen {
           />
         </Card>
 
-        <Checkout
-          isSmallScreen={this.isSmallScreen}
-          account={this.account}
-          newTransaction={this.props.newTransaction}
-          transaction={this.state.transaction}
-          triggerRawRedirect={this.triggerRawRedirect}
-        />
-
-        {this.renderClaim(width, padding)}
-        {this.renderTransactionHistory(width, padding)}
+        { this.renderDistribution(width, padding) }
       </div>
     )
   }
